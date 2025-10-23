@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,29 +7,34 @@ import { mockWorkouts, mockExercises } from '@/data/mockData';
 import { useToast } from '@/hooks/use-toast';
 
 export default function WorkoutDetails() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const workout = mockWorkouts.find((w) => w.id === id);
+
+  // Robust id matching in case ids are numbers/strings
+  const workout = mockWorkouts.find((w) => String(w.id) === String(id));
 
   const handleStartWorkout = () => {
-    // Store ongoing workout in sessionStorage
+    if (!workout) return;
+
+    // Store ongoing workout in sessionStorage (dedupe by workoutId)
     const ongoingWorkout = {
-      workoutId: workout?.id,
-      workoutName: workout?.name,
+      workoutId: workout.id,
+      workoutName: workout.name,
       startTime: new Date().toISOString(),
-      duration: workout?.duration,
-      caloriesBurned: workout?.caloriesBurned,
+      duration: workout.duration,
+      caloriesBurned: workout.caloriesBurned,
     };
-    
-    const existingWorkouts = JSON.parse(sessionStorage.getItem('ongoingWorkouts') || '[]');
-    sessionStorage.setItem('ongoingWorkouts', JSON.stringify([...existingWorkouts, ongoingWorkout]));
-    
+
+    const existingWorkouts: any[] = JSON.parse(sessionStorage.getItem('ongoingWorkouts') || '[]');
+    const withoutDup = existingWorkouts.filter((w) => String(w.workoutId) !== String(workout.id));
+    sessionStorage.setItem('ongoingWorkouts', JSON.stringify([...withoutDup, ongoingWorkout]));
+
     toast({
       title: 'Workout Started!',
-      description: `${workout?.name} is now in progress. Check your progress page.`,
+      description: `${workout.name} is now in progress. Check your progress page.`,
     });
-    
+
     navigate('/progress');
   };
 
@@ -44,8 +49,9 @@ export default function WorkoutDetails() {
     );
   }
 
+  // Match exercises defensively (ids may be number/string)
   const workoutExercises = mockExercises.filter((ex) =>
-    workout.exercises.includes(ex.id)
+    workout.exercises.map(String).includes(String(ex.id))
   );
 
   const getCategoryColor = (category: string) => {
@@ -82,6 +88,7 @@ export default function WorkoutDetails() {
           variant="ghost"
           onClick={() => navigate('/dashboard')}
           className="mb-6 -ml-2"
+          aria-label="Back to Dashboard"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
@@ -130,7 +137,7 @@ export default function WorkoutDetails() {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Button onClick={handleStartWorkout} className="flex-1" size="lg">
+            <Button onClick={handleStartWorkout} className="flex-1" size="lg" aria-label={`Start ${workout.name} workout`}>
               <Play className="mr-2 h-5 w-5" />
               Start Workout
             </Button>
@@ -150,14 +157,20 @@ export default function WorkoutDetails() {
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-xl mb-1">{exercise.name}</CardTitle>
+                        {/* Make the exercise name link to the routed details page */}
+                        <CardTitle className="text-xl mb-1">
+                          <Link
+                            to={`/exercise/${exercise.id}`}
+                            className="underline-offset-2 hover:underline"
+                            aria-label={`View details for ${exercise.name}`}
+                          >
+                            {exercise.name}
+                          </Link>
+                        </CardTitle>
                         <CardDescription>{exercise.description}</CardDescription>
                       </div>
                     </div>
-                    <Badge
-                      className={getCategoryColor(exercise.category)}
-                      variant="outline"
-                    >
+                    <Badge className={getCategoryColor(exercise.category)} variant="outline">
                       {exercise.category}
                     </Badge>
                   </div>
@@ -167,39 +180,45 @@ export default function WorkoutDetails() {
                     <div>
                       <p className="text-sm font-semibold mb-2">Target Muscles:</p>
                       <div className="flex flex-wrap gap-2">
-                        {exercise.targetMuscles.map((muscle) => (
-                          <Badge key={muscle} variant="secondary">
-                            {muscle}
-                          </Badge>
-                        ))}
+                        {exercise.targetMuscles?.length ? (
+                          exercise.targetMuscles.map((muscle) => (
+                            <Badge key={muscle} variant="secondary">
+                              {muscle}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-sm text-muted-foreground">—</span>
+                        )}
                       </div>
                     </div>
                     <div>
                       <p className="text-sm font-semibold mb-2">Equipment:</p>
                       <div className="flex flex-wrap gap-2">
-                        {exercise.equipment.length > 0 ? (
+                        {exercise.equipment?.length ? (
                           exercise.equipment.map((item) => (
                             <Badge key={item} variant="outline">
                               {item}
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-sm text-muted-foreground">
-                            No equipment needed
-                          </span>
+                          <span className="text-sm text-muted-foreground">No equipment needed</span>
                         )}
                       </div>
                     </div>
                     <div>
                       <p className="text-sm font-semibold mb-2">Instructions:</p>
-                      <ol className="space-y-2">
-                        {exercise.instructions.map((instruction, idx) => (
-                          <li key={idx} className="text-sm text-muted-foreground pl-5 relative">
-                            <span className="absolute left-0">{idx + 1}.</span>
-                            {instruction}
-                          </li>
-                        ))}
-                      </ol>
+                      {exercise.instructions?.length ? (
+                        <ol className="space-y-2">
+                          {exercise.instructions.map((instruction, idx) => (
+                            <li key={idx} className="text-sm text-muted-foreground pl-5 relative">
+                              <span className="absolute left-0">{idx + 1}.</span>
+                              {instruction}
+                            </li>
+                          ))}
+                        </ol>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">No instructions</span>
+                      )}
                     </div>
                   </div>
                 </CardContent>
