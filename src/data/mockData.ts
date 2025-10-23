@@ -49,17 +49,17 @@ export interface ProgressLog {
 export const mockUsers: User[] = [
   {
     id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
+    name: 'Nour Saad',
+    email: 'nour.saad@200s.com',
     password: 'password123',
-    joinDate: '2024-01-15',
+    joinDate: '2024-06-25',
     goals: 'Build muscle and increase strength',
   },
   {
     id: '2',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    password: 'password123',
+    name: 'Haya Mazyad',
+    email: 'haya.mazyad@200s.com',
+    password: 'pass456',
     joinDate: '2024-02-20',
     goals: 'Improve cardiovascular fitness',
   },
