@@ -1,14 +1,37 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Flame, TrendingUp, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Clock, Flame, TrendingUp, ArrowLeft, Play } from 'lucide-react';
 import { mockWorkouts, mockExercises } from '@/data/mockData';
+import { useToast } from '@/hooks/use-toast';
 
 export default function WorkoutDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const workout = mockWorkouts.find((w) => w.id === id);
+
+  const handleStartWorkout = () => {
+    // Store ongoing workout in sessionStorage
+    const ongoingWorkout = {
+      workoutId: workout?.id,
+      workoutName: workout?.name,
+      startTime: new Date().toISOString(),
+      duration: workout?.duration,
+      caloriesBurned: workout?.caloriesBurned,
+    };
+    
+    const existingWorkouts = JSON.parse(sessionStorage.getItem('ongoingWorkouts') || '[]');
+    sessionStorage.setItem('ongoingWorkouts', JSON.stringify([...existingWorkouts, ongoingWorkout]));
+    
+    toast({
+      title: 'Workout Started!',
+      description: `${workout?.name} is now in progress. Check your progress page.`,
+    });
+    
+    navigate('/progress');
+  };
 
   if (!workout) {
     return (
@@ -107,12 +130,10 @@ export default function WorkoutDetails() {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Link to="/log-workout" className="flex-1">
-              <Button className="w-full" size="lg">
-                <CheckCircle2 className="mr-2 h-5 w-5" />
-                Log This Workout
-              </Button>
-            </Link>
+            <Button onClick={handleStartWorkout} className="flex-1" size="lg">
+              <Play className="mr-2 h-5 w-5" />
+              Start Workout
+            </Button>
           </div>
         </div>
 

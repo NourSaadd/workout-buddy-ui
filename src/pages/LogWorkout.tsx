@@ -1,329 +1,186 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
-import { CalendarIcon, Check, Plus, X, Flame, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { Calendar as CalendarIcon, Clock, Flame, Save, ArrowLeft } from 'lucide-react';
 import { mockExercises } from '@/data/mockData';
-
-interface CustomExercise {
-  id: string;
-  name: string;
-  duration: number;
-  calories: number;
-}
+import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LogWorkout() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [workoutName, setWorkoutName] = useState('');
+  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [date, setDate] = useState<Date>(new Date());
-  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
-  const [customExercises, setCustomExercises] = useState<CustomExercise[]>([]);
-  const [newCustomExercise, setNewCustomExercise] = useState({
-    name: '',
-    duration: '',
-    calories: '',
-  });
-  const [notes, setNotes] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const calculateTotals = () => {
-    const selectedExercisesDuration = selectedExerciseIds.length * 15; // Assume 15 min per exercise
-    const selectedExercisesCalories = selectedExerciseIds.length * 100; // Assume 100 cal per exercise
-    
-    const customDuration = customExercises.reduce((sum, ex) => sum + ex.duration, 0);
-    const customCalories = customExercises.reduce((sum, ex) => sum + ex.calories, 0);
-    
-    return {
-      totalDuration: selectedExercisesDuration + customDuration,
-      totalCalories: selectedExercisesCalories + customCalories,
-    };
-  };
+  // Calculate totals based on selected exercises
+  const totalDuration = selectedExercises.reduce((sum, id) => {
+    // Estimate 10 minutes per exercise
+    return sum + 10;
+  }, 0);
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    const totals = calculateTotals();
+  const totalCalories = selectedExercises.reduce((sum, id) => {
+    // Estimate 50 calories per exercise
+    return sum + 50;
+  }, 0);
 
-    if (selectedExerciseIds.length === 0 && customExercises.length === 0) {
-      newErrors.exercises = 'Please select at least one exercise or add a custom exercise';
-    }
-    if (totals.totalDuration === 0) {
-      newErrors.duration = 'Total duration must be greater than 0';
-    }
-    if (notes.length > 500) {
-      newErrors.notes = 'Notes must be less than 500 characters';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleAddCustomExercise = () => {
-    if (!newCustomExercise.name.trim()) {
-      toast.error('Please enter an exercise name');
-      return;
-    }
-    if (!newCustomExercise.duration || parseInt(newCustomExercise.duration) <= 0) {
-      toast.error('Duration must be greater than 0');
-      return;
-    }
-    if (!newCustomExercise.calories || parseInt(newCustomExercise.calories) <= 0) {
-      toast.error('Calories must be greater than 0');
-      return;
-    }
-
-    const customExercise: CustomExercise = {
-      id: `custom-${Date.now()}`,
-      name: newCustomExercise.name,
-      duration: parseInt(newCustomExercise.duration),
-      calories: parseInt(newCustomExercise.calories),
-    };
-
-    setCustomExercises([...customExercises, customExercise]);
-    setNewCustomExercise({ name: '', duration: '', calories: '' });
-    toast.success('Custom exercise added!');
-  };
-
-  const handleRemoveCustomExercise = (id: string) => {
-    setCustomExercises(customExercises.filter((ex) => ex.id !== id));
-  };
-
-  const toggleExerciseSelection = (exerciseId: string) => {
-    setSelectedExerciseIds((prev) =>
+  const handleExerciseToggle = (exerciseId: string) => {
+    setSelectedExercises((prev) =>
       prev.includes(exerciseId)
         ? prev.filter((id) => id !== exerciseId)
         : [...prev, exerciseId]
     );
-    if (errors.exercises) {
-      setErrors((prev) => ({ ...prev, exercises: '' }));
-    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      toast.error('Please fix the errors in the form');
+  const handleSubmit = () => {
+    if (!workoutName.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a workout name',
+        variant: 'destructive',
+      });
       return;
     }
 
-    const totals = calculateTotals();
-    
-    toast.success(
-      <div className="flex items-center gap-2">
-        <Check className="h-4 w-4" />
-        <span>Workout logged successfully!</span>
-      </div>
-    );
+    if (selectedExercises.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Please select at least one exercise',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Success',
+      description: `Workout "${workoutName}" logged successfully!`,
+    });
 
     // Reset form
-    setSelectedExerciseIds([]);
-    setCustomExercises([]);
-    setNotes('');
+    setWorkoutName('');
+    setSelectedExercises([]);
     setDate(new Date());
-
-    // Navigate to progress page after a short delay
-    setTimeout(() => {
-      navigate('/progress');
-    }, 1500);
   };
 
-  const totals = calculateTotals();
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'strength':
+        return 'bg-primary/10 text-primary border-primary/20';
+      case 'cardio':
+        return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'flexibility':
+        return 'bg-accent/10 text-accent border-accent/20';
+      default:
+        return 'bg-secondary text-secondary-foreground';
+    }
+  };
 
   return (
     <div className="min-h-screen py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/dashboard')}
+          className="mb-6 -ml-2"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Dashboard
+        </Button>
+
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-destructive bg-clip-text text-transparent">
             Log New Workout
           </h1>
           <p className="text-lg text-muted-foreground">
-            Select exercises or create custom ones to track your workout
+            Select exercises and create your workout session
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Workout Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Workout Details</CardTitle>
+                <CardDescription>Name your workout and select the date</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="workout-name">Workout Name *</Label>
+                  <Input
+                    id="workout-name"
+                    placeholder="e.g., Morning Upper Body Session"
+                    value={workoutName}
+                    onChange={(e) => setWorkoutName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(date, 'PPP')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Exercise Selection */}
             <Card>
               <CardHeader>
                 <CardTitle>Select Exercises</CardTitle>
                 <CardDescription>
-                  Choose from our exercise library
+                  Choose exercises for this workout ({selectedExercises.length} selected)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2">
+                <div className="space-y-3 max-h-[500px] overflow-y-auto">
                   {mockExercises.map((exercise) => (
                     <div
                       key={exercise.id}
-                      className={cn(
-                        'flex items-start space-x-3 p-3 rounded-lg border transition-colors hover:bg-accent cursor-pointer',
-                        selectedExerciseIds.includes(exercise.id) && 'bg-accent border-primary'
-                      )}
-                      onClick={() => toggleExerciseSelection(exercise.id)}
+                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
                     >
                       <Checkbox
-                        checked={selectedExerciseIds.includes(exercise.id)}
-                        onCheckedChange={() => toggleExerciseSelection(exercise.id)}
+                        id={exercise.id}
+                        checked={selectedExercises.includes(exercise.id)}
+                        onCheckedChange={() => handleExerciseToggle(exercise.id)}
                         className="mt-1"
                       />
-                      <div className="flex-1">
-                        <div className="font-medium">{exercise.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {exercise.category} • {exercise.difficulty}
+                      <label
+                        htmlFor={exercise.id}
+                        className="flex-1 cursor-pointer"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-semibold">{exercise.name}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-1">
+                              {exercise.description}
+                            </p>
+                          </div>
+                          <Badge
+                            className={getCategoryColor(exercise.category)}
+                            variant="outline"
+                          >
+                            {exercise.category}
+                          </Badge>
                         </div>
-                      </div>
+                      </label>
                     </div>
                   ))}
-                </div>
-                {errors.exercises && (
-                  <p className="text-sm text-destructive mt-2">{errors.exercises}</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Add Custom Exercise */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Add Custom Exercise</CardTitle>
-                <CardDescription>
-                  Create your own exercise with name, duration, and calories
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="custom-name">Exercise Name *</Label>
-                    <Input
-                      id="custom-name"
-                      placeholder="e.g., Swimming, Boxing, Dance"
-                      value={newCustomExercise.name}
-                      onChange={(e) =>
-                        setNewCustomExercise({ ...newCustomExercise, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="custom-duration">Duration (min) *</Label>
-                      <Input
-                        id="custom-duration"
-                        type="number"
-                        placeholder="30"
-                        value={newCustomExercise.duration}
-                        onChange={(e) =>
-                          setNewCustomExercise({ ...newCustomExercise, duration: e.target.value })
-                        }
-                        min="1"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="custom-calories">Calories *</Label>
-                      <Input
-                        id="custom-calories"
-                        type="number"
-                        placeholder="200"
-                        value={newCustomExercise.calories}
-                        onChange={(e) =>
-                          setNewCustomExercise({ ...newCustomExercise, calories: e.target.value })
-                        }
-                        min="1"
-                      />
-                    </div>
-                  </div>
-                  <Button onClick={handleAddCustomExercise} className="w-full" variant="outline">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Custom Exercise
-                  </Button>
-
-                  {/* Custom Exercises List */}
-                  {customExercises.length > 0 && (
-                    <div className="space-y-2 mt-4">
-                      <Label>Custom Exercises Added</Label>
-                      {customExercises.map((exercise) => (
-                        <div
-                          key={exercise.id}
-                          className="flex items-center justify-between p-3 rounded-lg border bg-accent"
-                        >
-                          <div>
-                            <div className="font-medium">{exercise.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {exercise.duration} min • {exercise.calories} cal
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveCustomExercise(exercise.id)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Date and Notes */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Additional Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Date *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full justify-start text-left font-normal',
-                          !date && 'text-muted-foreground'
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? format(date, 'PPP') : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={(date) => date && setDate(date)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes (Optional)</Label>
-                  <Textarea
-                    id="notes"
-                    placeholder="How did you feel during the workout? Any achievements or challenges?"
-                    value={notes}
-                    onChange={(e) => {
-                      setNotes(e.target.value);
-                      if (errors.notes) {
-                        setErrors((prev) => ({ ...prev, notes: '' }));
-                      }
-                    }}
-                    className={errors.notes ? 'border-destructive' : ''}
-                    rows={4}
-                  />
-                  <p className="text-xs text-muted-foreground">{notes.length}/500 characters</p>
-                  {errors.notes && <p className="text-sm text-destructive">{errors.notes}</p>}
                 </div>
               </CardContent>
             </Card>
@@ -334,57 +191,49 @@ export default function LogWorkout() {
             <Card className="sticky top-8">
               <CardHeader>
                 <CardTitle>Workout Summary</CardTitle>
+                <CardDescription>Estimated totals</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10">
-                    <div className="flex items-center gap-2">
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                       <Clock className="h-5 w-5 text-primary" />
-                      <span className="font-medium">Total Duration</span>
                     </div>
-                    <span className="text-2xl font-bold">{totals.totalDuration}</span>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Duration</p>
+                      <p className="text-2xl font-bold">{totalDuration} min</p>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground text-center">minutes</div>
-                </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/10">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
                       <Flame className="h-5 w-5 text-destructive" />
-                      <span className="font-medium">Total Calories</span>
                     </div>
-                    <span className="text-2xl font-bold">{totals.totalCalories}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground text-center">calories burned</div>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <div className="text-sm space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Library Exercises:</span>
-                      <span className="font-medium">{selectedExerciseIds.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Custom Exercises:</span>
-                      <span className="font-medium">{customExercises.length}</span>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Calories</p>
+                      <p className="text-2xl font-bold">{totalCalories} kcal</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 space-y-2">
-                  <Button onClick={handleSubmit} className="w-full" size="lg">
-                    <Check className="mr-2 h-4 w-4" />
-                    Log Workout
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => navigate('/dashboard')}
-                    className="w-full"
-                  >
-                    Cancel
-                  </Button>
+                <div className="pt-4 border-t space-y-2">
+                  <p className="text-sm font-semibold">Selected Exercises:</p>
+                  {selectedExercises.length > 0 ? (
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      {selectedExercises.map((id) => {
+                        const exercise = mockExercises.find((ex) => ex.id === id);
+                        return exercise ? <li key={id}>• {exercise.name}</li> : null;
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">No exercises selected</p>
+                  )}
                 </div>
+
+                <Button onClick={handleSubmit} className="w-full" size="lg">
+                  <Save className="mr-2 h-5 w-5" />
+                  Log Workout
+                </Button>
               </CardContent>
             </Card>
           </div>

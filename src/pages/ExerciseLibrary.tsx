@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -18,14 +21,26 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ExerciseCard } from '@/components/ExerciseCard';
 import { mockExercises, type Exercise } from '@/data/mockData';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ExerciseLibrary() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  
+  // Form state for creating custom exercise
+  const [newExerciseName, setNewExerciseName] = useState('');
+  const [newExerciseDescription, setNewExerciseDescription] = useState('');
+  const [newExerciseCategory, setNewExerciseCategory] = useState('strength');
+  const [newExerciseDifficulty, setNewExerciseDifficulty] = useState('beginner');
 
-  const filteredExercises = mockExercises.filter((exercise) => {
+  const allExercises = [...mockExercises, ...customExercises];
+
+  const filteredExercises = allExercises.filter((exercise) => {
     const matchesSearch =
       exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       exercise.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -37,6 +52,40 @@ export default function ExerciseLibrary() {
       difficultyFilter === 'all' || exercise.difficulty === difficultyFilter;
     return matchesSearch && matchesCategory && matchesDifficulty;
   });
+
+  const handleCreateExercise = () => {
+    if (!newExerciseName.trim()) {
+      toast({
+        title: "Error",
+        description: "Exercise name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newExercise: Exercise = {
+      id: `custom-${Date.now()}`,
+      name: newExerciseName,
+      description: newExerciseDescription || 'Custom exercise',
+      category: newExerciseCategory as 'strength' | 'cardio' | 'flexibility' | 'sports',
+      difficulty: newExerciseDifficulty as 'beginner' | 'intermediate' | 'advanced',
+      targetMuscles: ['Custom'],
+      equipment: [],
+      instructions: ['Perform exercise as needed'],
+    };
+
+    setCustomExercises([...customExercises, newExercise]);
+    setIsCreateDialogOpen(false);
+    setNewExerciseName('');
+    setNewExerciseDescription('');
+    setNewExerciseCategory('strength');
+    setNewExerciseDifficulty('beginner');
+
+    toast({
+      title: "Success",
+      description: "Custom exercise created successfully!",
+    });
+  };
 
   return (
     <div className="min-h-screen py-8">
@@ -52,14 +101,20 @@ export default function ExerciseLibrary() {
 
         {/* Search and Filter Bar */}
         <div className="mb-8 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search exercises by name, muscle group, or equipment..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search exercises by name, muscle group, or equipment..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Custom Exercise
+            </Button>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -98,7 +153,12 @@ export default function ExerciseLibrary() {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
-            Showing {filteredExercises.length} of {mockExercises.length} exercises
+            Showing {filteredExercises.length} of {allExercises.length} exercises
+            {customExercises.length > 0 && (
+              <span className="ml-2 text-primary">
+                ({customExercises.length} custom)
+              </span>
+            )}
           </p>
         </div>
 
@@ -200,6 +260,74 @@ export default function ExerciseLibrary() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Exercise Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Custom Exercise</DialogTitle>
+            <DialogDescription>
+              Add a new exercise to your library
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="exercise-name">Exercise Name *</Label>
+              <Input
+                id="exercise-name"
+                placeholder="e.g., Custom Squat Variation"
+                value={newExerciseName}
+                onChange={(e) => setNewExerciseName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="exercise-description">Description</Label>
+              <Textarea
+                id="exercise-description"
+                placeholder="Describe the exercise..."
+                value={newExerciseDescription}
+                onChange={(e) => setNewExerciseDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="exercise-category">Category</Label>
+              <Select value={newExerciseCategory} onValueChange={setNewExerciseCategory}>
+                <SelectTrigger id="exercise-category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="strength">Strength</SelectItem>
+                  <SelectItem value="cardio">Cardio</SelectItem>
+                  <SelectItem value="flexibility">Flexibility</SelectItem>
+                  <SelectItem value="sports">Sports</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="exercise-difficulty">Difficulty</Label>
+              <Select value={newExerciseDifficulty} onValueChange={setNewExerciseDifficulty}>
+                <SelectTrigger id="exercise-difficulty">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateExercise}>
+                Create Exercise
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

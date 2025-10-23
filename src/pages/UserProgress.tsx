@@ -1,15 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Calendar, Clock, Flame, TrendingUp, Award, Target } from 'lucide-react';
+import { Calendar, Clock, Flame, TrendingUp, Award, Target, Play, CheckCircle2 } from 'lucide-react';
 import { mockProgressLogs, mockWorkouts, mockUsers } from '@/data/mockData';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UserProgress() {
-  // Simulate logged-in user
+  const { toast } = useToast();
   const currentUser = mockUsers[0];
   const userLogs = mockProgressLogs.filter((log) => log.userId === currentUser.id);
+  const [ongoingWorkouts, setOngoingWorkouts] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Load ongoing workouts from sessionStorage
+    const stored = JSON.parse(sessionStorage.getItem('ongoingWorkouts') || '[]');
+    setOngoingWorkouts(stored);
+  }, []);
+
+  const handleCompleteWorkout = (index: number) => {
+    const updatedWorkouts = ongoingWorkouts.filter((_, i) => i !== index);
+    setOngoingWorkouts(updatedWorkouts);
+    sessionStorage.setItem('ongoingWorkouts', JSON.stringify(updatedWorkouts));
+    
+    toast({
+      title: 'Workout Completed!',
+      description: 'Great job! Keep up the excellent work.',
+    });
+  };
 
   // Calculate statistics
   const totalWorkouts = userLogs.length;
@@ -136,6 +156,56 @@ export default function UserProgress() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Ongoing Workouts */}
+        {ongoingWorkouts.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Ongoing Workouts</CardTitle>
+              <CardDescription>Your active workout sessions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {ongoingWorkouts.map((workout, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                        <Play className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{workout.workoutName}</h3>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{workout.duration} min</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Flame className="h-3 w-3" />
+                            <span>{workout.caloriesBurned} cal</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Started: {format(new Date(workout.startTime), 'MMM dd, yyyy HH:mm')}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => handleCompleteWorkout(index)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Complete
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Recent Activity */}
         <Card>
