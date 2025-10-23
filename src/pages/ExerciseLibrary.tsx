@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Search, Filter, X, Plus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Filter, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Link } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -31,7 +32,7 @@ export default function ExerciseLibrary() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  
+
   // Form state for creating custom exercise
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newExerciseDescription, setNewExerciseDescription] = useState('');
@@ -43,6 +44,13 @@ export default function ExerciseLibrary() {
   const [newExerciseReps, setNewExerciseReps] = useState('');
   const [newExerciseDuration, setNewExerciseDuration] = useState('');
 
+  // 🔹 Load saved custom exercises on first mount
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("customExercises") || "[]");
+    setCustomExercises(saved);
+  }, []);
+
+  // Merge default + custom exercises
   const allExercises = [...mockExercises, ...customExercises];
 
   const filteredExercises = allExercises.filter((exercise) => {
@@ -74,20 +82,28 @@ export default function ExerciseLibrary() {
       description: newExerciseDescription || 'Custom exercise',
       category: newExerciseCategory as 'strength' | 'cardio' | 'flexibility' | 'sports',
       difficulty: newExerciseDifficulty as 'beginner' | 'intermediate' | 'advanced',
-      targetMuscles: newExerciseTargetMuscles 
-        ? newExerciseTargetMuscles.split(',').map(m => m.trim()).filter(m => m)
+      targetMuscles: newExerciseTargetMuscles
+        ? newExerciseTargetMuscles.split(',').map(m => m.trim()).filter(Boolean)
         : ['Custom'],
       equipment: newExerciseEquipment
-        ? newExerciseEquipment.split(',').map(e => e.trim()).filter(e => e)
+        ? newExerciseEquipment.split(',').map(e => e.trim()).filter(Boolean)
         : [],
       instructions: ['Perform exercise as needed'],
       sets: newExerciseSets ? parseInt(newExerciseSets) : undefined,
       reps: newExerciseReps ? parseInt(newExerciseReps) : undefined,
       duration: newExerciseDuration ? parseInt(newExerciseDuration) : undefined,
-      caloriesBurned: newExerciseDuration ? parseInt(newExerciseDuration) * 10 : (newExerciseSets && newExerciseReps) ? parseInt(newExerciseSets) * 20 : 50,
+      caloriesBurned: newExerciseDuration
+        ? parseInt(newExerciseDuration) * 10
+        : (newExerciseSets && newExerciseReps)
+          ? parseInt(newExerciseSets) * 20
+          : 50,
     };
 
-    setCustomExercises([...customExercises, newExercise]);
+    const updated = [...customExercises, newExercise];
+    setCustomExercises(updated);
+    localStorage.setItem("customExercises", JSON.stringify(updated)); // 🔹 persist
+
+    // reset form
     setIsCreateDialogOpen(false);
     setNewExerciseName('');
     setNewExerciseDescription('');
@@ -108,6 +124,7 @@ export default function ExerciseLibrary() {
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-destructive bg-clip-text text-transparent">
             Exercise Library
@@ -117,7 +134,7 @@ export default function ExerciseLibrary() {
           </p>
         </div>
 
-        {/* Search and Filter Bar */}
+        {/* Search & Filters */}
         <div className="mb-8 space-y-4">
           <div className="flex gap-4">
             <div className="relative flex-1">
@@ -213,7 +230,7 @@ export default function ExerciseLibrary() {
               </DialogHeader>
 
               <div className="space-y-6 mt-4">
-                {/* Exercise Info */}
+                {/* Info badges */}
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="capitalize">
                     {selectedExercise.category}
@@ -238,7 +255,7 @@ export default function ExerciseLibrary() {
                   )}
                 </div>
 
-                {/* Target Muscles */}
+                {/* Target muscles */}
                 <div>
                   <h3 className="font-semibold mb-2 text-lg">Target Muscles</h3>
                   <div className="flex flex-wrap gap-2">
@@ -279,6 +296,13 @@ export default function ExerciseLibrary() {
                       </li>
                     ))}
                   </ol>
+                </div>
+
+                {/* 🔹 View full page link */}
+                <div className="flex justify-end pt-4">
+                  <Link to={`/exercise/${selectedExercise.id}`}>
+                    <Button variant="secondary">View full page</Button>
+                  </Link>
                 </div>
               </div>
             </>
