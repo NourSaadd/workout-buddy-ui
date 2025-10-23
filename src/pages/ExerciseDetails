@@ -1,10 +1,11 @@
 import { useParams, Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { mockExercises } from "@/data/mockData";
 
 export default function ExerciseDetails() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  // mock IDs are strings like "ex1", "ex2" so string compare is correct
   const exercise = mockExercises.find(e => String(e.id) === String(id));
 
   if (!exercise) {
@@ -23,31 +24,30 @@ export default function ExerciseDetails() {
         <Link to="/exercises" className="underline">Back to Exercise Library</Link>
       </div>
 
+      {/* meta badges */}
       <div className="flex flex-wrap gap-2">
         <Badge variant="outline" className="capitalize">{exercise.category}</Badge>
         <Badge variant="secondary" className="capitalize">{exercise.difficulty}</Badge>
-        {exercise.equipment?.map(eq => <Badge key={eq} variant="outline">{eq}</Badge>)}
+        {exercise.equipment?.map(eq => (
+          <Badge key={eq} variant="outline">{eq}</Badge>
+        ))}
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">{exercise.description}</p>
-        </CardContent>
+        <CardHeader><CardTitle>Description</CardTitle></CardHeader>
+        <CardContent><p className="text-muted-foreground">{exercise.description}</p></CardContent>
       </Card>
 
-      {exercise.targetMuscles?.length ? (
+      {!!exercise.targetMuscles?.length && (
         <Card>
           <CardHeader><CardTitle>Target muscles</CardTitle></CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {exercise.targetMuscles.map(m => <Badge key={m} variant="secondary">{m}</Badge>)}
           </CardContent>
         </Card>
-      ) : null}
+      )}
 
-      {exercise.instructions?.length ? (
+      {!!exercise.instructions?.length && (
         <Card>
           <CardHeader><CardTitle>How to do it</CardTitle></CardHeader>
           <CardContent>
@@ -56,7 +56,14 @@ export default function ExerciseDetails() {
             </ol>
           </CardContent>
         </Card>
-      ) : null}
+      )}
+
+      <div className="text-sm text-muted-foreground">
+        {/* optional extra meta shown if present in your mock data */}
+        {exercise.sets && exercise.reps && <div>{exercise.sets}×{exercise.reps}</div>}
+        {exercise.duration && <div>~{exercise.duration} min</div>}
+        {exercise.caloriesBurned && <div>≈{exercise.caloriesBurned} kcal</div>}
+      </div>
     </div>
   );
 }
