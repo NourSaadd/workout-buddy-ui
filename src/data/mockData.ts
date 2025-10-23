@@ -17,6 +17,10 @@ export interface Exercise {
   targetMuscles: string[];
   equipment: string[];
   instructions: string[];
+  sets?: number;
+  reps?: number;
+  duration?: number; // in minutes
+  caloriesBurned?: number;
 }
 
 export interface Workout {
@@ -77,6 +81,10 @@ export const mockExercises: Exercise[] = [
       'Press the bar back up to starting position',
       'Repeat for desired reps',
     ],
+    sets: 4,
+    reps: 10,
+    duration: 15,
+    caloriesBurned: 120,
   },
   {
     id: 'ex2',
@@ -93,13 +101,17 @@ export const mockExercises: Exercise[] = [
       'Go down until thighs are parallel to the ground',
       'Drive through your heels to return to starting position',
     ],
+    sets: 4,
+    reps: 12,
+    duration: 18,
+    caloriesBurned: 140,
   },
   {
     id: 'ex3',
-    name: 'Running',
+    name: 'Short Run',
     category: 'cardio',
     difficulty: 'beginner',
-    description: 'Classic cardiovascular exercise that improves endurance and burns calories.',
+    description: 'Quick cardiovascular exercise that improves endurance and burns calories.',
     targetMuscles: ['Legs', 'Core', 'Cardiovascular System'],
     equipment: ['Running Shoes'],
     instructions: [
@@ -109,6 +121,8 @@ export const mockExercises: Exercise[] = [
       'Breathe rhythmically',
       'Cool down with a 5-minute walk',
     ],
+    duration: 15,
+    caloriesBurned: 150,
   },
   {
     id: 'ex4',
@@ -125,6 +139,10 @@ export const mockExercises: Exercise[] = [
       'Drive through your heels to lift the bar',
       'Stand up fully, then lower the bar in a controlled manner',
     ],
+    sets: 5,
+    reps: 6,
+    duration: 20,
+    caloriesBurned: 180,
   },
   {
     id: 'ex5',
@@ -141,6 +159,10 @@ export const mockExercises: Exercise[] = [
       'Push back up to starting position',
       'Repeat for desired reps',
     ],
+    sets: 3,
+    reps: 15,
+    duration: 8,
+    caloriesBurned: 60,
   },
   {
     id: 'ex6',
@@ -159,6 +181,9 @@ export const mockExercises: Exercise[] = [
       'Push up to downward dog',
       'Step forward and return to standing',
     ],
+    sets: 5,
+    duration: 12,
+    caloriesBurned: 70,
   },
   {
     id: 'ex7',
@@ -176,6 +201,10 @@ export const mockExercises: Exercise[] = [
       'Jump feet back to squat position',
       'Jump up with arms overhead',
     ],
+    sets: 4,
+    reps: 12,
+    duration: 10,
+    caloriesBurned: 120,
   },
   {
     id: 'ex8',
@@ -192,6 +221,9 @@ export const mockExercises: Exercise[] = [
       'Hold the position',
       'Breathe steadily',
     ],
+    sets: 3,
+    duration: 5,
+    caloriesBurned: 35,
   },
   {
     id: 'ex9',
@@ -208,6 +240,10 @@ export const mockExercises: Exercise[] = [
       'Lower yourself back down in a controlled manner',
       'Repeat for desired reps',
     ],
+    sets: 4,
+    reps: 8,
+    duration: 12,
+    caloriesBurned: 100,
   },
   {
     id: 'ex10',
@@ -224,6 +260,10 @@ export const mockExercises: Exercise[] = [
       'Push back to starting position',
       'Alternate legs',
     ],
+    sets: 3,
+    reps: 12,
+    duration: 10,
+    caloriesBurned: 75,
   },
   {
     id: 'ex11',
@@ -240,6 +280,10 @@ export const mockExercises: Exercise[] = [
       'Continue alternating at a rapid pace',
       'Keep your core engaged throughout',
     ],
+    sets: 4,
+    reps: 20,
+    duration: 8,
+    caloriesBurned: 90,
   },
   {
     id: 'ex12',
@@ -256,6 +300,10 @@ export const mockExercises: Exercise[] = [
       'Lower it back down in a controlled manner',
       'Complete reps then switch sides',
     ],
+    sets: 4,
+    reps: 12,
+    duration: 14,
+    caloriesBurned: 110,
   },
   {
     id: 'ex13',
@@ -272,6 +320,10 @@ export const mockExercises: Exercise[] = [
       'Switch sides in a pedaling motion',
       'Continue alternating sides',
     ],
+    sets: 3,
+    reps: 20,
+    duration: 7,
+    caloriesBurned: 50,
   },
   {
     id: 'ex14',
@@ -288,6 +340,8 @@ export const mockExercises: Exercise[] = [
       'Land softly on the balls of your feet',
       'Maintain a steady rhythm',
     ],
+    duration: 10,
+    caloriesBurned: 120,
   },
   {
     id: 'ex15',
@@ -304,6 +358,10 @@ export const mockExercises: Exercise[] = [
       'Lower back to starting position',
       'Keep core engaged throughout',
     ],
+    sets: 3,
+    reps: 10,
+    duration: 12,
+    caloriesBurned: 95,
   },
   {
     id: 'ex16',
@@ -320,6 +378,10 @@ export const mockExercises: Exercise[] = [
       'Press through your heels to extend legs',
       'Do not lock out your knees',
     ],
+    sets: 4,
+    reps: 15,
+    duration: 13,
+    caloriesBurned: 100,
   },
   {
     id: 'ex17',
@@ -336,6 +398,10 @@ export const mockExercises: Exercise[] = [
       'Roll back down vertebra by vertebra',
       'Focus on engaging your core',
     ],
+    sets: 3,
+    reps: 10,
+    duration: 10,
+    caloriesBurned: 60,
   },
   {
     id: 'ex18',
@@ -352,6 +418,10 @@ export const mockExercises: Exercise[] = [
       'Stand up fully on the box',
       'Step or jump back down carefully',
     ],
+    sets: 4,
+    reps: 10,
+    duration: 12,
+    caloriesBurned: 140,
   },
   {
     id: 'ex19',
@@ -368,6 +438,10 @@ export const mockExercises: Exercise[] = [
       'Push back up to starting position',
       'Keep elbows close to your body',
     ],
+    sets: 3,
+    reps: 12,
+    duration: 10,
+    caloriesBurned: 85,
   },
   {
     id: 'ex20',
@@ -384,6 +458,8 @@ export const mockExercises: Exercise[] = [
       'Gradually increase resistance as needed',
       'Cool down with easy pedaling',
     ],
+    duration: 25,
+    caloriesBurned: 250,
   },
   {
     id: 'ex21',
@@ -400,6 +476,10 @@ export const mockExercises: Exercise[] = [
       'Thrust hips forward to swing weight to shoulder height',
       'Let momentum carry the movement',
     ],
+    sets: 4,
+    reps: 15,
+    duration: 12,
+    caloriesBurned: 130,
   },
   {
     id: 'ex22',
@@ -416,6 +496,8 @@ export const mockExercises: Exercise[] = [
       'Maintain strong core engagement',
       'Continue for timed intervals',
     ],
+    duration: 15,
+    caloriesBurned: 200,
   },
   {
     id: 'ex23',
@@ -432,6 +514,8 @@ export const mockExercises: Exercise[] = [
       'Rest forehead on the mat',
       'Breathe deeply and hold',
     ],
+    duration: 8,
+    caloriesBurned: 30,
   },
   {
     id: 'ex24',
@@ -448,6 +532,28 @@ export const mockExercises: Exercise[] = [
       'Drive hips forward to return to standing',
       'Keep bar close to legs throughout',
     ],
+    sets: 4,
+    reps: 10,
+    duration: 14,
+    caloriesBurned: 115,
+  },
+  {
+    id: 'ex25',
+    name: 'Long Run',
+    category: 'cardio',
+    difficulty: 'intermediate',
+    description: 'Extended cardiovascular run for building endurance and stamina.',
+    targetMuscles: ['Legs', 'Core', 'Cardiovascular System'],
+    equipment: ['Running Shoes'],
+    instructions: [
+      'Start with a 5-minute warm-up walk',
+      'Begin running at a steady, sustainable pace',
+      'Focus on breathing and maintaining form',
+      'Stay hydrated throughout',
+      'Cool down with a 5-minute walk',
+    ],
+    duration: 45,
+    caloriesBurned: 500,
   },
 ];
 

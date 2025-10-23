@@ -37,6 +37,11 @@ export default function ExerciseLibrary() {
   const [newExerciseDescription, setNewExerciseDescription] = useState('');
   const [newExerciseCategory, setNewExerciseCategory] = useState('strength');
   const [newExerciseDifficulty, setNewExerciseDifficulty] = useState('beginner');
+  const [newExerciseEquipment, setNewExerciseEquipment] = useState('');
+  const [newExerciseTargetMuscles, setNewExerciseTargetMuscles] = useState('');
+  const [newExerciseSets, setNewExerciseSets] = useState('');
+  const [newExerciseReps, setNewExerciseReps] = useState('');
+  const [newExerciseDuration, setNewExerciseDuration] = useState('');
 
   const allExercises = [...mockExercises, ...customExercises];
 
@@ -69,9 +74,17 @@ export default function ExerciseLibrary() {
       description: newExerciseDescription || 'Custom exercise',
       category: newExerciseCategory as 'strength' | 'cardio' | 'flexibility' | 'sports',
       difficulty: newExerciseDifficulty as 'beginner' | 'intermediate' | 'advanced',
-      targetMuscles: ['Custom'],
-      equipment: [],
+      targetMuscles: newExerciseTargetMuscles 
+        ? newExerciseTargetMuscles.split(',').map(m => m.trim()).filter(m => m)
+        : ['Custom'],
+      equipment: newExerciseEquipment
+        ? newExerciseEquipment.split(',').map(e => e.trim()).filter(e => e)
+        : [],
       instructions: ['Perform exercise as needed'],
+      sets: newExerciseSets ? parseInt(newExerciseSets) : undefined,
+      reps: newExerciseReps ? parseInt(newExerciseReps) : undefined,
+      duration: newExerciseDuration ? parseInt(newExerciseDuration) : undefined,
+      caloriesBurned: newExerciseDuration ? parseInt(newExerciseDuration) * 10 : (newExerciseSets && newExerciseReps) ? parseInt(newExerciseSets) * 20 : 50,
     };
 
     setCustomExercises([...customExercises, newExercise]);
@@ -80,6 +93,11 @@ export default function ExerciseLibrary() {
     setNewExerciseDescription('');
     setNewExerciseCategory('strength');
     setNewExerciseDifficulty('beginner');
+    setNewExerciseEquipment('');
+    setNewExerciseTargetMuscles('');
+    setNewExerciseSets('');
+    setNewExerciseReps('');
+    setNewExerciseDuration('');
 
     toast({
       title: "Success",
@@ -188,20 +206,10 @@ export default function ExerciseLibrary() {
           {selectedExercise && (
             <>
               <DialogHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <DialogTitle className="text-2xl mb-2">{selectedExercise.name}</DialogTitle>
-                    <DialogDescription className="text-base">
-                      {selectedExercise.description}
-                    </DialogDescription>
-                  </div>
-                  <button
-                    onClick={() => setSelectedExercise(null)}
-                    className="rounded-full p-1 hover:bg-muted"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+                <DialogTitle className="text-2xl mb-2">{selectedExercise.name}</DialogTitle>
+                <DialogDescription className="text-base">
+                  {selectedExercise.description}
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-6 mt-4">
@@ -213,6 +221,21 @@ export default function ExerciseLibrary() {
                   <Badge variant="secondary" className="capitalize">
                     {selectedExercise.difficulty}
                   </Badge>
+                  {selectedExercise.sets && selectedExercise.reps && (
+                    <Badge variant="outline">
+                      {selectedExercise.sets} sets × {selectedExercise.reps} reps
+                    </Badge>
+                  )}
+                  {selectedExercise.duration && (
+                    <Badge variant="outline">
+                      {selectedExercise.duration} min
+                    </Badge>
+                  )}
+                  {selectedExercise.caloriesBurned && (
+                    <Badge variant="outline">
+                      ~{selectedExercise.caloriesBurned} cal
+                    </Badge>
+                  )}
                 </div>
 
                 {/* Target Muscles */}
@@ -318,6 +341,56 @@ export default function ExerciseLibrary() {
                   <SelectItem value="advanced">Advanced</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label htmlFor="exercise-equipment">Equipment (comma-separated)</Label>
+              <Input
+                id="exercise-equipment"
+                placeholder="e.g., Dumbbells, Bench"
+                value={newExerciseEquipment}
+                onChange={(e) => setNewExerciseEquipment(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="exercise-target-muscles">Target Muscles (comma-separated)</Label>
+              <Input
+                id="exercise-target-muscles"
+                placeholder="e.g., Chest, Triceps, Shoulders"
+                value={newExerciseTargetMuscles}
+                onChange={(e) => setNewExerciseTargetMuscles(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="exercise-sets">Sets (for strength)</Label>
+                <Input
+                  id="exercise-sets"
+                  type="number"
+                  placeholder="e.g., 3"
+                  value={newExerciseSets}
+                  onChange={(e) => setNewExerciseSets(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="exercise-reps">Reps (for strength)</Label>
+                <Input
+                  id="exercise-reps"
+                  type="number"
+                  placeholder="e.g., 12"
+                  value={newExerciseReps}
+                  onChange={(e) => setNewExerciseReps(e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="exercise-duration">Duration in minutes (for cardio/flexibility)</Label>
+              <Input
+                id="exercise-duration"
+                type="number"
+                placeholder="e.g., 20"
+                value={newExerciseDuration}
+                onChange={(e) => setNewExerciseDuration(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>

@@ -56,6 +56,23 @@ export const ExerciseCard = ({ exercise, onClick }: ExerciseCardProps) => {
             </Badge>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          {exercise.sets && exercise.reps && (
+            <span className="text-xs text-muted-foreground">
+              {exercise.sets}×{exercise.reps}
+            </span>
+          )}
+          {exercise.duration && (
+            <span className="text-xs text-muted-foreground">
+              {exercise.duration} min
+            </span>
+          )}
+          {exercise.caloriesBurned && (
+            <span className="text-xs text-muted-foreground">
+              ~{exercise.caloriesBurned} cal
+            </span>
+          )}
+        </div>
         <div className="flex items-center justify-between">
           <Badge className={getDifficultyColor(exercise.difficulty)} variant="secondary">
             {exercise.difficulty}

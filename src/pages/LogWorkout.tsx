@@ -22,13 +22,13 @@ export default function LogWorkout() {
 
   // Calculate totals based on selected exercises
   const totalDuration = selectedExercises.reduce((sum, id) => {
-    // Estimate 10 minutes per exercise
-    return sum + 10;
+    const exercise = mockExercises.find(ex => ex.id === id);
+    return sum + (exercise?.duration || 10);
   }, 0);
 
   const totalCalories = selectedExercises.reduce((sum, id) => {
-    // Estimate 50 calories per exercise
-    return sum + 50;
+    const exercise = mockExercises.find(ex => ex.id === id);
+    return sum + (exercise?.caloriesBurned || 50);
   }, 0);
 
   const handleExerciseToggle = (exerciseId: string) => {
@@ -58,6 +58,21 @@ export default function LogWorkout() {
       return;
     }
 
+    // Save workout to sessionStorage to appear in dashboard
+    const customWorkout = {
+      id: `custom-${Date.now()}`,
+      name: workoutName,
+      category: 'strength' as const,
+      duration: totalDuration,
+      difficulty: 'intermediate' as const,
+      exercises: selectedExercises,
+      description: `Custom workout with ${selectedExercises.length} exercises`,
+      caloriesBurned: totalCalories,
+    };
+
+    const existingWorkouts = JSON.parse(sessionStorage.getItem('customWorkouts') || '[]');
+    sessionStorage.setItem('customWorkouts', JSON.stringify([...existingWorkouts, customWorkout]));
+
     toast({
       title: 'Success',
       description: `Workout "${workoutName}" logged successfully!`,
@@ -67,6 +82,9 @@ export default function LogWorkout() {
     setWorkoutName('');
     setSelectedExercises([]);
     setDate(new Date());
+    
+    // Navigate to dashboard to see the new workout
+    navigate('/dashboard');
   };
 
   const getCategoryColor = (category: string) => {

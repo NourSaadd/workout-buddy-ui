@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { WorkoutCard } from '@/components/WorkoutCard';
-import { mockWorkouts } from '@/data/mockData';
+import { mockWorkouts, type Workout } from '@/data/mockData';
 import { Link } from 'react-router-dom';
 
 export default function WorkoutDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
+  const [customWorkouts, setCustomWorkouts] = useState<Workout[]>([]);
 
-  const filteredWorkouts = mockWorkouts.filter((workout) => {
+  // Load custom workouts from sessionStorage
+  useEffect(() => {
+    const stored = sessionStorage.getItem('customWorkouts');
+    if (stored) {
+      setCustomWorkouts(JSON.parse(stored));
+    }
+  }, []);
+
+  const allWorkouts = [...mockWorkouts, ...customWorkouts];
+
+  const filteredWorkouts = allWorkouts.filter((workout) => {
     const matchesSearch = workout.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       workout.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || workout.category === categoryFilter;
@@ -93,7 +104,12 @@ export default function WorkoutDashboard() {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
-            Showing {filteredWorkouts.length} of {mockWorkouts.length} workouts
+            Showing {filteredWorkouts.length} of {allWorkouts.length} workouts
+            {customWorkouts.length > 0 && (
+              <span className="ml-2 text-primary">
+                ({customWorkouts.length} custom)
+              </span>
+            )}
           </p>
         </div>
 
