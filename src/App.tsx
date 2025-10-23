@@ -10,6 +10,7 @@ import WorkoutDashboard from "./pages/WorkoutDashboard";
 import LogWorkout from "./pages/LogWorkout";
 import ExerciseLibrary from "./pages/ExerciseLibrary";
 import WorkoutDetails from "./pages/WorkoutDetails";
+import ExerciseDetails from "./pages/ExerciseDetails";
 import UserProgress from "./pages/UserProgress";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/dashboard" element={<WorkoutDashboard />} />
                 <Route path="/log-workout" element={<LogWorkout />} />
                 <Route path="/exercises" element={<ExerciseLibrary />} />
+                <Route path="/details" element={<ExerciseDetails />} />
                 <Route path="/workout/:id" element={<WorkoutDetails />} />
                 <Route path="/progress" element={<UserProgress />} />
                 <Route path="/login" element={<Login />} />
