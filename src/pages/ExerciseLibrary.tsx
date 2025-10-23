@@ -310,19 +310,17 @@ export default function ExerciseLibrary() {
         </DialogContent>
       </Dialog>
 
-    {/* Create Exercise Dialog */}
-    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-      <DialogContent className="sm:max-w-3xl max-h-[85vh] p-0">
-        <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle>Create Custom Exercise</DialogTitle>
-          <DialogDescription>Add a new exercise to your library.</DialogDescription>
-        </DialogHeader>
-    
-        {/* Scrollable form body */}
-        <div className="px-6 pb-6 overflow-y-auto">
-          {/* 2-column responsive layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left column */}
+      {/* Create Exercise Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Custom Exercise</DialogTitle>
+            <DialogDescription>Add a new exercise to your library</DialogDescription>
+          </DialogHeader>
+      
+          {/* Two-column form */}
+          <div className="mt-4 grid gap-5 sm:grid-cols-2">
+            {/* LEFT COLUMN */}
             <div className="space-y-4">
               <div>
                 <Label htmlFor="exercise-name">Exercise Name *</Label>
@@ -333,7 +331,7 @@ export default function ExerciseLibrary() {
                   onChange={(e) => setNewExerciseName(e.target.value)}
                 />
               </div>
-    
+      
               <div>
                 <Label htmlFor="exercise-description">Description</Label>
                 <Textarea
@@ -341,50 +339,42 @@ export default function ExerciseLibrary() {
                   placeholder="Describe the exercise..."
                   value={newExerciseDescription}
                   onChange={(e) => setNewExerciseDescription(e.target.value)}
-                  rows={5}
+                  rows={6}
+                  className="min-h-[140px]"
                 />
               </div>
-    
-              {/* Category & Difficulty side-by-side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="exercise-category">Category</Label>
-                  <Select
-                    value={newExerciseCategory}
-                    onValueChange={setNewExerciseCategory}
-                  >
-                    <SelectTrigger id="exercise-category">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="strength">Strength</SelectItem>
-                      <SelectItem value="cardio">Cardio</SelectItem>
-                      <SelectItem value="flexibility">Flexibility</SelectItem>
-                      <SelectItem value="sports">Sports</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-    
-                <div>
-                  <Label htmlFor="exercise-difficulty">Difficulty</Label>
-                  <Select
-                    value={newExerciseDifficulty}
-                    onValueChange={setNewExerciseDifficulty}
-                  >
-                    <SelectTrigger id="exercise-difficulty">
-                      <SelectValue placeholder="Difficulty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beginner">Beginner</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="advanced">Advanced</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+      
+              <div>
+                <Label htmlFor="exercise-category">Category</Label>
+                <Select value={newExerciseCategory} onValueChange={setNewExerciseCategory}>
+                  <SelectTrigger id="exercise-category">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="strength">Strength</SelectItem>
+                    <SelectItem value="cardio">Cardio</SelectItem>
+                    <SelectItem value="flexibility">Flexibility</SelectItem>
+                    <SelectItem value="sports">Sports</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+      
+              <div>
+                <Label htmlFor="exercise-difficulty">Difficulty</Label>
+                <Select value={newExerciseDifficulty} onValueChange={setNewExerciseDifficulty}>
+                  <SelectTrigger id="exercise-difficulty">
+                    <SelectValue placeholder="Select a difficulty" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-    
-            {/* Right column */}
+      
+            {/* RIGHT COLUMN */}
             <div className="space-y-4">
               <div>
                 <Label htmlFor="exercise-equipment">Equipment (comma-separated)</Label>
@@ -395,7 +385,7 @@ export default function ExerciseLibrary() {
                   onChange={(e) => setNewExerciseEquipment(e.target.value)}
                 />
               </div>
-    
+      
               <div>
                 <Label htmlFor="exercise-target-muscles">Target Muscles (comma-separated)</Label>
                 <Input
@@ -405,11 +395,11 @@ export default function ExerciseLibrary() {
                   onChange={(e) => setNewExerciseTargetMuscles(e.target.value)}
                 />
               </div>
-    
-              {/* Sets / Reps / Duration in one horizontal row */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      
+              {/* Numbers in a mini-grid */}
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="exercise-sets">Sets</Label>
+                  <Label htmlFor="exercise-sets">Sets (for strength)</Label>
                   <Input
                     id="exercise-sets"
                     type="number"
@@ -419,7 +409,7 @@ export default function ExerciseLibrary() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="exercise-reps">Reps</Label>
+                  <Label htmlFor="exercise-reps">Reps (for strength)</Label>
                   <Input
                     id="exercise-reps"
                     type="number"
@@ -428,30 +418,31 @@ export default function ExerciseLibrary() {
                     onChange={(e) => setNewExerciseReps(e.target.value)}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="exercise-duration">Duration (min)</Label>
-                  <Input
-                    id="exercise-duration"
-                    type="number"
-                    placeholder="e.g., 20"
-                    value={newExerciseDuration}
-                    onChange={(e) => setNewExerciseDuration(e.target.value)}
-                  />
-                </div>
+              </div>
+      
+              <div>
+                <Label htmlFor="exercise-duration">Duration in minutes (for cardio/flexibility)</Label>
+                <Input
+                  id="exercise-duration"
+                  type="number"
+                  placeholder="e.g., 20"
+                  value={newExerciseDuration}
+                  onChange={(e) => setNewExerciseDuration(e.target.value)}
+                />
               </div>
             </div>
           </div>
-    
-          {/* Footer */}
+      
+          {/* Actions */}
           <div className="flex justify-end gap-2 pt-6">
             <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleCreateExercise}>Create Exercise</Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
