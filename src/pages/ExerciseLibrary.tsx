@@ -310,123 +310,148 @@ export default function ExerciseLibrary() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Exercise Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Custom Exercise</DialogTitle>
-            <DialogDescription>
-              Add a new exercise to your library
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div>
-              <Label htmlFor="exercise-name">Exercise Name *</Label>
-              <Input
-                id="exercise-name"
-                placeholder="e.g., Custom Squat Variation"
-                value={newExerciseName}
-                onChange={(e) => setNewExerciseName(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="exercise-description">Description</Label>
-              <Textarea
-                id="exercise-description"
-                placeholder="Describe the exercise..."
-                value={newExerciseDescription}
-                onChange={(e) => setNewExerciseDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="exercise-category">Category</Label>
-              <Select value={newExerciseCategory} onValueChange={setNewExerciseCategory}>
-                <SelectTrigger id="exercise-category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="strength">Strength</SelectItem>
-                  <SelectItem value="cardio">Cardio</SelectItem>
-                  <SelectItem value="flexibility">Flexibility</SelectItem>
-                  <SelectItem value="sports">Sports</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="exercise-difficulty">Difficulty</Label>
-              <Select value={newExerciseDifficulty} onValueChange={setNewExerciseDifficulty}>
-                <SelectTrigger id="exercise-difficulty">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="exercise-equipment">Equipment (comma-separated)</Label>
-              <Input
-                id="exercise-equipment"
-                placeholder="e.g., Dumbbells, Bench"
-                value={newExerciseEquipment}
-                onChange={(e) => setNewExerciseEquipment(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="exercise-target-muscles">Target Muscles (comma-separated)</Label>
-              <Input
-                id="exercise-target-muscles"
-                placeholder="e.g., Chest, Triceps, Shoulders"
-                value={newExerciseTargetMuscles}
-                onChange={(e) => setNewExerciseTargetMuscles(e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+    {/* Create Exercise Dialog */}
+    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+      <DialogContent className="sm:max-w-3xl max-h-[85vh] p-0">
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle>Create Custom Exercise</DialogTitle>
+          <DialogDescription>Add a new exercise to your library.</DialogDescription>
+        </DialogHeader>
+    
+        {/* Scrollable form body */}
+        <div className="px-6 pb-6 overflow-y-auto">
+          {/* 2-column responsive layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left column */}
+            <div className="space-y-4">
               <div>
-                <Label htmlFor="exercise-sets">Sets (for strength)</Label>
+                <Label htmlFor="exercise-name">Exercise Name *</Label>
                 <Input
-                  id="exercise-sets"
-                  type="number"
-                  placeholder="e.g., 3"
-                  value={newExerciseSets}
-                  onChange={(e) => setNewExerciseSets(e.target.value)}
+                  id="exercise-name"
+                  placeholder="e.g., Custom Squat Variation"
+                  value={newExerciseName}
+                  onChange={(e) => setNewExerciseName(e.target.value)}
                 />
               </div>
+    
               <div>
-                <Label htmlFor="exercise-reps">Reps (for strength)</Label>
-                <Input
-                  id="exercise-reps"
-                  type="number"
-                  placeholder="e.g., 12"
-                  value={newExerciseReps}
-                  onChange={(e) => setNewExerciseReps(e.target.value)}
+                <Label htmlFor="exercise-description">Description</Label>
+                <Textarea
+                  id="exercise-description"
+                  placeholder="Describe the exercise..."
+                  value={newExerciseDescription}
+                  onChange={(e) => setNewExerciseDescription(e.target.value)}
+                  rows={5}
                 />
               </div>
+    
+              {/* Category & Difficulty side-by-side */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="exercise-category">Category</Label>
+                  <Select
+                    value={newExerciseCategory}
+                    onValueChange={setNewExerciseCategory}
+                  >
+                    <SelectTrigger id="exercise-category">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="strength">Strength</SelectItem>
+                      <SelectItem value="cardio">Cardio</SelectItem>
+                      <SelectItem value="flexibility">Flexibility</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+    
+                <div>
+                  <Label htmlFor="exercise-difficulty">Difficulty</Label>
+                  <Select
+                    value={newExerciseDifficulty}
+                    onValueChange={setNewExerciseDifficulty}
+                  >
+                    <SelectTrigger id="exercise-difficulty">
+                      <SelectValue placeholder="Difficulty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="exercise-duration">Duration in minutes (for cardio/flexibility)</Label>
-              <Input
-                id="exercise-duration"
-                type="number"
-                placeholder="e.g., 20"
-                value={newExerciseDuration}
-                onChange={(e) => setNewExerciseDuration(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleCreateExercise}>
-                Create Exercise
-              </Button>
+    
+            {/* Right column */}
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="exercise-equipment">Equipment (comma-separated)</Label>
+                <Input
+                  id="exercise-equipment"
+                  placeholder="e.g., Dumbbells, Bench"
+                  value={newExerciseEquipment}
+                  onChange={(e) => setNewExerciseEquipment(e.target.value)}
+                />
+              </div>
+    
+              <div>
+                <Label htmlFor="exercise-target-muscles">Target Muscles (comma-separated)</Label>
+                <Input
+                  id="exercise-target-muscles"
+                  placeholder="e.g., Chest, Triceps, Shoulders"
+                  value={newExerciseTargetMuscles}
+                  onChange={(e) => setNewExerciseTargetMuscles(e.target.value)}
+                />
+              </div>
+    
+              {/* Sets / Reps / Duration in one horizontal row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="exercise-sets">Sets</Label>
+                  <Input
+                    id="exercise-sets"
+                    type="number"
+                    placeholder="e.g., 3"
+                    value={newExerciseSets}
+                    onChange={(e) => setNewExerciseSets(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="exercise-reps">Reps</Label>
+                  <Input
+                    id="exercise-reps"
+                    type="number"
+                    placeholder="e.g., 12"
+                    value={newExerciseReps}
+                    onChange={(e) => setNewExerciseReps(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="exercise-duration">Duration (min)</Label>
+                  <Input
+                    id="exercise-duration"
+                    type="number"
+                    placeholder="e.g., 20"
+                    value={newExerciseDuration}
+                    onChange={(e) => setNewExerciseDuration(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+    
+          {/* Footer */}
+          <div className="flex justify-end gap-2 pt-6">
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateExercise}>Create Exercise</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
     </div>
   );
 }
